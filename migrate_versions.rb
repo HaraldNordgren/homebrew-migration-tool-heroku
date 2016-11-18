@@ -46,10 +46,6 @@ def replace_brew_class (file_name, regex_captures)
     })
 end
 
-project_root = File.dirname(__FILE__) + "/.."
-#project_root = File.dirname(__FILE__) + "/sandbox"
-Dir.chdir project_root
-
 aliases_dir = "Aliases"
 formula_dir = "Formula"
 
@@ -83,8 +79,9 @@ for filename in Dir["*.rb"]
     end
 
     migrated_path = File.join(formula_dir, filename)
-    system("git mv #{filename} #{migrated_path}")
+    #system("git mv #{filename} #{migrated_path}")
     #system("git add #{migrated_path}")
+    FileUtils.mv(filename, migrated_path)
 end
 
 puts "STEP 1 DONE"
@@ -115,13 +112,8 @@ for file_name in Dir["*.rb"]
         end
     end
 
+    FileUtils.mv(tmp_file_name,file_name)
     puts "Handled " + file_name
-
-    FileUtils.mv(
-        tmp_file_name,
-        file_name,
-        #:force => true
-    )
 end
 
 puts "STEP 2 DONE"
@@ -135,15 +127,16 @@ for handled_package in $handled_packages
     FileUtils.mkdir_p(formula_subdir)
 
     migrated_path = File.join(formula_subdir, handled_package['migrated_filename'])
-    system("git mv #{original_filename} #{migrated_path}")
-    system("git add #{migrated_path}")
+    #system("git mv #{original_filename} #{migrated_path}")
+    #system("git add #{migrated_path}")
+    FileUtils.mv(original_filename, migrated_path)
 
     symlink_dest = File.join("..", migrated_path)
     symlink_location = File.join(aliases_dir, package_at_version)
     FileUtils.ln_s(symlink_dest, symlink_location)
 end
 
-system("git add #{aliases_dir}")
+#system("git add #{aliases_dir}")
 
 puts "STEP 3 DONE"
 puts
