@@ -2,6 +2,12 @@
 
 set -e
 
+function go_to_sleep {
+    echo "Sleeping for 5 minutes ..."
+    echo
+    sleep 300
+}
+
 base_dir="$(dirname $BASH_SOURCE)"
 migrate_versions="$base_dir"/migrate_versions.rb
 
@@ -12,35 +18,52 @@ fi
 
 cd "$1"
 
+git checkout homebrew-versions
+git reset --hard -q
+git clean -fd
+
+leftover_branches="$(git branch | grep homebrew-versions-)" || true
+if [ -n "$leftover_branches" ]; then
+    echo
+    while read -r branch; do
+        git branch -D $branch
+    done <<< "$leftover_branches"
+fi
+
+echo
+
 while :; do
-    git fetch > fetch_log.txt 2>&1
-    if [ -s fetch_log.txt ]
-    then
+    echo "PULLING LATEST COMMITS FROM HOMEBREW-VERSIONS"
+    git pull
+
+    latest_homebrew_commit=$(git rev-parse HEAD)
+    if git log master -1 --pretty=%B | grep -q $latest_homebrew_commit ; then
+        echo
         echo "NOTHING NEW TO MIGRATE"
-        sleep 300
+        go_to_sleep
         continue
     fi
 
-    git checkout homebrew-versions
-    git pull
-
-    timestamp=$(date +%s)
-    staging_branch=homebrew-versions-$timestamp
+    staging_branch=homebrew-versions-$latest_homebrew_commit
 
     echo
-    echo "RUNNING MIGRATIONS"
     git checkout -b $staging_branch
     ruby "$migrate_versions"
     git add .
-    git commit -m "Auto-migration $timestamp"
+    git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
 
-    echo "MERGING IN CHANGES"
-    git checkout master
-    #if ! git cherry-pick staging_branch; then
-    if ! git merge $staging_branch; then
-        git add .
-        git commit --no-edit
-        #git cherry-pick --continue
-    fi
+    echo "MERGING BRANCHES"
+    git checkout master -q
+    git merge $staging_branch -X theirs --no-edit -q
 
+    echo
+    echo "PUSHING TO REMOTE"
+    git push
     git branch -d $staging_branch
+
+    git checkout homebrew-versions -q
+
+    echo
+    go_to_sleep    
+done
+

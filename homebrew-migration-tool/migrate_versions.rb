@@ -51,11 +51,13 @@ formula_dir = "Formula"
 
 for dirname in [aliases_dir, formula_dir]
     unless File.directory?(dirname)
-        puts "Creating " + dirname
+        puts "Creating #{dirname} folder"
         FileUtils.mkdir_p(dirname)
     end
 end
+
 puts
+puts "RENAMING CLASSES ..."
 
 $handled_packages = []
 
@@ -84,8 +86,9 @@ for filename in Dir["*.rb"]
     FileUtils.mv(filename, migrated_path)
 end
 
-puts "STEP 1 DONE"
+puts "DONE"
 puts
+puts "REPLACING REFERENCES WITH VERSIONED NAME"
 
 for file_name in Dir["*.rb"]
 
@@ -95,7 +98,6 @@ for file_name in Dir["*.rb"]
         File.open(file_name).each_line do |line|
 
             if line =~ /^[ ]+(url|homepage|mirror|\#include) /
-                #puts "Skipping replacement in '#{line}'"
                 tmp_file.puts line
                 next
             end
@@ -113,11 +115,14 @@ for file_name in Dir["*.rb"]
     end
 
     FileUtils.mv(tmp_file_name,file_name)
-    puts "Handled " + file_name
+    #puts "Handled " + file_name
+    print "."
 end
 
-puts "STEP 2 DONE"
 puts
+puts "DONE"
+puts
+puts "MOVING FILES ..."
 
 for handled_package in $handled_packages
     original_filename = handled_package['original_filename']
@@ -138,6 +143,6 @@ end
 
 #system("git add #{aliases_dir}")
 
-puts "STEP 3 DONE"
+puts "DONE"
 puts
-puts "ALL DONE"
+
