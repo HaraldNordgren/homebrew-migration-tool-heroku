@@ -17,3 +17,7 @@
 
 # Ignore ruby-version
 /.ruby-version
+
+homebrew-migration-tool/
+homebrew-versions/
+
