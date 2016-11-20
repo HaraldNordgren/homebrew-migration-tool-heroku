@@ -8,8 +8,9 @@ function go_to_sleep {
     sleep 300
 }
 
-base_dir="$(dirname $BASH_SOURCE)"
-migrate_versions="$base_dir"/migrate_versions.rb
+#base_dir="$(dirname $BASH_SOURCE)"
+base_dir=$PWD
+migrate_versions="$base_dir"/homebrew-migration-tool/migrate_versions.rb
 
 if [ -z "$1" ]; then
     echo "Supply repo dir to migrate"
@@ -48,6 +49,7 @@ while :; do
 
     echo
     git checkout -b $staging_branch
+
     ruby "$migrate_versions"
     git add .
     git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
