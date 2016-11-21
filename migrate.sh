@@ -51,7 +51,7 @@ while :; do
     git checkout -b $staging_branch
 
     ruby "$migrate_versions"
-    git add .
+    git add . -A
     git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
 
     echo "MERGING BRANCHES"
