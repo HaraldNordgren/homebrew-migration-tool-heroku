@@ -2,6 +2,8 @@
 
 set -e
 
+nc -k -l $PORT &
+
 mkdir -p .ssh
 echo "$GITHUB_PRIVATE_SSH_KEY" > .ssh/id_rsa
 chmod 600 .ssh/id_rsa
