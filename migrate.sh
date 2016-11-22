@@ -38,7 +38,7 @@ while :; do
     git pull
 
     latest_homebrew_commit=$(git rev-parse HEAD)
-    if git log master -1 --pretty=%B | grep -q $latest_homebrew_commit ; then
+    if git log master --pretty=%B | grep -q $latest_homebrew_commit ; then
         echo "NOTHING NEW TO MIGRATE"
         go_to_sleep
         continue
