@@ -3,7 +3,7 @@
 set -e
 
 function go_to_sleep {
-    echo "Sleeping for 5 minutes ..."
+    echo "Going to sleep for 5 minutes ..."
     echo
     sleep 300
 }
@@ -19,7 +19,7 @@ fi
 
 cd "$1"
 
-git checkout homebrew-versions
+git checkout homebrew-versions -q
 git reset --hard -q
 git clean -fd
 
@@ -39,7 +39,6 @@ while :; do
 
     latest_homebrew_commit=$(git rev-parse HEAD)
     if git log master -1 --pretty=%B | grep -q $latest_homebrew_commit ; then
-        echo
         echo "NOTHING NEW TO MIGRATE"
         go_to_sleep
         continue
@@ -65,7 +64,7 @@ while :; do
 
     git checkout homebrew-versions -q
 
-    echo
+    echo "MIGRATION COMPLETED"
     go_to_sleep    
 done
 
