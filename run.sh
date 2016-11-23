@@ -9,6 +9,9 @@ echo "$GITHUB_PRIVATE_SSH_KEY" > .ssh/id_rsa
 chmod 600 .ssh/id_rsa
 ssh-keyscan github.com >> .ssh/known_hosts
 
+base_dir="$PWD"
+migrate_versions="$base_dir"/migrate_versions.rb
+
 git clone git@github.com:HaraldNordgren/homebrew-versions.git
 cd homebrew-versions
 
@@ -34,7 +37,7 @@ echo
 staging_branch=homebrew-versions-$latest_homebrew_commit
 git checkout -b $staging_branch
 
-ruby migrate_versions.rb
+ruby "$migrate_versions"
 
 git add . -A
 git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
