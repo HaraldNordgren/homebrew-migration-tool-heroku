@@ -44,7 +44,12 @@ git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_comm
 
 echo "MERGING BRANCHES"
 git checkout master -q
-git merge $staging_branch -X theirs --no-edit -q
+if ! git merge $staging_branch -X theirs --no-edit -q; then
+    echo
+    echo "SOLVING CONFLICTS BY ADDING ALL FILES"
+    git add .
+    git commit --no-edit
+fi
 
 echo
 echo "PUSHING TO REMOTE"
