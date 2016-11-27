@@ -11,6 +11,7 @@ ssh-keyscan github.com >> .ssh/known_hosts
 
 base_dir="$PWD"
 migrate_versions="$base_dir"/migrate_versions.rb
+README="$base_dir"/homebrew-versions-harald-README/README.md
 
 git clone git@github.com:HaraldNordgren/homebrew-versions.git
 cd homebrew-versions
@@ -39,6 +40,7 @@ git checkout -b $staging_branch
 
 ruby "$migrate_versions"
 
+cp "$README" .
 git add . -A
 git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
 
