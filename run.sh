@@ -13,12 +13,13 @@ base_dir="$PWD"
 migrate_versions="$base_dir"/migrate_versions.rb
 README="$base_dir"/homebrew-versions-harald-README/README.md
 
+echo
 git clone git@github.com:HaraldNordgren/homebrew-versions.git
 cd homebrew-versions
 
 git remote add homebrew-versions-origin https://github.com/Homebrew/homebrew-versions
 git fetch homebrew-versions-origin
-git checkout -b homebrew-versions homebrew-versions-origin/master
+git checkout -b homebrew-versions homebrew-versions-origin/master -q
 
 git config user.email "haraldnordgren+homebrew-version-migration-bot@gmail.com"
 git config user.name "homebrew-version-migration-bot"
@@ -41,9 +42,12 @@ git checkout -b $staging_branch
 ruby "$migrate_versions"
 
 cp "$README" .
+git rm LICENSE
+
 git add . -A
 git commit -m "Migrated 'Homebrew/homebrew-versions' up to $latest_homebrew_commit" -q
 
+echo
 echo "MERGING BRANCHES"
 git checkout master -q
 if ! git merge $staging_branch -X theirs --no-edit -q; then
