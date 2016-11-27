@@ -1,2 +1,1 @@
-web: ./run.sh
-
+#web: ./run.sh
