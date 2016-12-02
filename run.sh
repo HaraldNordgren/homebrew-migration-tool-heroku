@@ -70,10 +70,10 @@ for commit in $unmigrated_commits; do
         git reset LICENSE
     fi
 
-    git commit -m "Migrated $commit from 'Homebrew/homebrew-versions'" -q
-    migration_hash=$(git rev-parse HEAD)
+    homebrew_message=$(git log $commit --pretty=%B -n1)
+    git commit -m "Migrated $commit: '$homebrew_message'" -q
 
-    set -x
+    migration_hash=$(git rev-parse HEAD)
 
     echo
     echo "MERGING BRANCHES"
