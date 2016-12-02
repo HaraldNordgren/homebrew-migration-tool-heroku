@@ -60,7 +60,7 @@ for commit in $unmigrated_commits; do
 
     ruby "$migrate_versions"
 
-    git add .
+    git add --ignore-removal .
     
     if [ -e README.md ]; then
         git reset README.md
@@ -82,7 +82,7 @@ for commit in $unmigrated_commits; do
     if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
-        git add .
+        git add --ignore-removal .
         git -c core.editor=true cherry-pick --continue
     fi
 
