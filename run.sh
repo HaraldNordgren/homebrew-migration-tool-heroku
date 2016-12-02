@@ -4,7 +4,7 @@ set -e
 
 base_dir="$PWD"
 migrate_versions="$base_dir"/migrate_versions.rb
-README="$base_dir"/homebrew-versions-harald-README/README.md
+#README="$base_dir"/homebrew-versions-harald-README/README.md
 
 if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
     nc -k -l $PORT &
@@ -87,11 +87,11 @@ for commit in $unmigrated_commits; do
     fi
 
     git branch -D $staging_branch
-done
 
-echo
-echo "PUSHING TO REMOTE"
-git push
+    echo
+    echo "PUSHING TO REMOTE"
+    git push
+done
 
 echo "MIGRATION COMPLETED"
 exit 0
