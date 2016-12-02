@@ -24,7 +24,7 @@ def replace_brew_class (file_name, regex_captures)
 
     #puts "Replacing #{classname_with_version}"
     text.sub!(
-        /(^class )#{classname_with_version}( < Formula$)/,
+        /(^class )#{classname_with_version}([ ]*<[ ]*Formula$)/,
         '\1' + classname + '\2'
     )
 
@@ -35,7 +35,7 @@ def replace_brew_class (file_name, regex_captures)
 
     if not text.match("^  version ")
         text.sub!(
-            /(^class .* < Formula$)/,
+            /(^class .*<[ ]*Formula$)/,
             '\1' + "\n" + '  version "' + version + '"'
         )
     end
