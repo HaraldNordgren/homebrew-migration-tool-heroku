@@ -4,6 +4,7 @@ require 'fileutils'
 def replace_brew_class (file_name, regex_captures)
     package = regex_captures[0]
     version = regex_captures[1]
+    #puts "Matched #{package} with version #{version}"
 
     classname = ""
     for word in package.split("-")
@@ -17,6 +18,11 @@ def replace_brew_class (file_name, regex_captures)
 
     text = File.read(file_name)
 
+    if not text.match(/#{classname_with_version}/)
+        classname_with_version.tr!(".", "")
+    end
+
+    #puts "Replacing #{classname_with_version}"
     text.sub!(
         /(^class )#{classname_with_version}( < Formula$)/,
         '\1' + classname + '\2'
