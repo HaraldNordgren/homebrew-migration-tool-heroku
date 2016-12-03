@@ -13,12 +13,12 @@ if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
     echo "$GITHUB_PRIVATE_SSH_KEY" > .ssh/id_rsa
     chmod 600 .ssh/id_rsa
     ssh-keyscan github.com >> .ssh/known_hosts
-    github_adress="git@github.com:HaraldNordgren/homebrew-versions.git"
-    #github_adress="git@github.com:HaraldNordgren/homebrew-versions-cherry.git"
+    #github_adress="git@github.com:HaraldNordgren/homebrew-versions.git"
+    github_adress="git@github.com:HaraldNordgren/homebrew-versions-cherry.git"
 else
     rm -rf homebrew-versions
-    github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
-    #github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
+    #github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
+    github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
 fi
 
 echo
@@ -60,8 +60,8 @@ for commit in $unmigrated_commits; do
 
     ruby "$migrate_versions"
 
-    git add -A .
-
+    git add --ignore-removal .
+    
     if [ -e README.md ]; then
         git reset README.md
     fi
@@ -73,22 +73,20 @@ for commit in $unmigrated_commits; do
     homebrew_message=$(git log $commit --pretty=%B -n1)
     git commit -m "Migrated $commit: '$homebrew_message'" -q
 
-    #migration_hash=$(git rev-parse HEAD)
+    migration_hash=$(git rev-parse HEAD)
 
     echo
     echo "MERGING BRANCHES"
     git checkout master -q
 
-    if ! git merge $staging_branch -X theirs --no-edit -q; then
-    #if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
+    if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
-        git add -A .
-        #git -c core.editor=true cherry-pick --continue
-        git commit --no-edit
+        git add --ignore-removal .
+        git -c core.editor=true cherry-pick --continue
     fi
 
-    git branch -d $staging_branch
+    git branch -D $staging_branch
 
     echo
     echo "PUSHING TO REMOTE"
