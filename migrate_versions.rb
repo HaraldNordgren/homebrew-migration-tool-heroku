@@ -22,6 +22,13 @@ def replace_brew_class (file_name, regex_captures)
         classname_with_version.tr!(".", "")
     end
 
+    if not text.match(/#{classname_with_version}/)
+        mismatched_version = text.match(/^class #{classname}([0-9\.]+)/)
+        if mismatched_version
+            classname_with_version = classname + mismatched_version[1]
+        end
+    end
+
     #puts "Replacing #{classname_with_version}"
     text.sub!(
         /(^class )#{classname_with_version}([ ]*<[ ]*Formula$)/,
