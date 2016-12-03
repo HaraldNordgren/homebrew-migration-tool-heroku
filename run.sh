@@ -59,8 +59,8 @@ for commit in $unmigrated_commits; do
     git checkout -b $staging_branch $commit
 
     ruby "$migrate_versions"
-
-    git add --ignore-removal .
+    
+    #git add --ignore-removal .
     
     if [ -e README.md ]; then
         git reset README.md
