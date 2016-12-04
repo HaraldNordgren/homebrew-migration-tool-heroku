@@ -22,6 +22,7 @@ else
 fi
 
 echo
+echo "CLONING $github_adress"
 git clone $github_adress homebrew-versions -v
 cd homebrew-versions
 
@@ -83,7 +84,7 @@ for commit in $unmigrated_commits; do
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
         git status
-        git add . -A
+        git add -u .
         git -c core.editor=true cherry-pick --continue
     fi
 
