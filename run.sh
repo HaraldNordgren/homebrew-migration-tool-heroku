@@ -89,6 +89,7 @@ for commit in $unmigrated_commits; do
     fi
 
     git branch -D $staging_branch
+    git clean -fd
 
     echo
     echo "PUSHING TO REMOTE"
