@@ -72,7 +72,7 @@ for commit in $unmigrated_commits; do
     fi
 
     homebrew_message=$(git log $commit --pretty=%B -n1)
-    git commit -m "Migrated $commit: '$homebrew_message'" -q
+    git commit -m "Migrating $commit: '$homebrew_message'" -q
 
     migration_hash=$(git rev-parse HEAD)
 
@@ -80,27 +80,18 @@ for commit in $unmigrated_commits; do
     echo "MERGING BRANCHES"
     git checkout master -q
 
-    if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
+    git checkout $migration_hash Formula Aliases
+    git status -u
+
+    if [ -n "$(git status --porcelain)" ]; then
+        git commit -m "Migrated $commit: '$homebrew_message'" -q
+        
         echo
-        echo "SOLVING CONFLICTS BY ADDING ALL FILES"
-        git status -u
-
-        for both_added in $(git status --porcelain | awk '{if ($1 == "AA") { print $2 }}'); do
-            echo "CHECKING OUT THEIRS FOR $both_added"
-            git checkout --theirs "$both_added"
-        done
-
-        git add -u .
-        #git status -u
-        git -c core.editor=true cherry-pick --continue
+        echo "PUSHING TO REMOTE"
+        git push
     fi
 
     git branch -D $staging_branch
-    git clean -fd
-
-    echo
-    echo "PUSHING TO REMOTE"
-    git push
 done
 
 echo "MIGRATION COMPLETED"
