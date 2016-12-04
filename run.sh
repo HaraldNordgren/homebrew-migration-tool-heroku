@@ -13,12 +13,12 @@ if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
     echo "$GITHUB_PRIVATE_SSH_KEY" > .ssh/id_rsa
     chmod 600 .ssh/id_rsa
     ssh-keyscan github.com >> .ssh/known_hosts
-    #github_adress="git@github.com:HaraldNordgren/homebrew-versions.git"
-    github_adress="git@github.com:HaraldNordgren/homebrew-versions-cherry.git"
+    github_adress="git@github.com:HaraldNordgren/homebrew-versions.git"
+    #github_adress="git@github.com:HaraldNordgren/homebrew-versions-cherry.git"
 else
     rm -rf homebrew-versions
-    #github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
-    github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
+    github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
+    #github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
 fi
 
 echo
