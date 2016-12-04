@@ -23,7 +23,7 @@ fi
 
 echo
 echo "CLONING $github_adress"
-git clone $github_adress homebrew-versions -v
+git clone $github_adress homebrew-versions
 cd homebrew-versions
 
 git remote add homebrew-versions-origin https://github.com/Homebrew/homebrew-versions
@@ -83,8 +83,9 @@ for commit in $unmigrated_commits; do
     if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
+        git status -u
         git add -u .
-        git status
+        #git status -u
         git -c core.editor=true cherry-pick --continue
     fi
 
