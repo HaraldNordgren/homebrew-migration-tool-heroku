@@ -84,6 +84,12 @@ for commit in $unmigrated_commits; do
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
         git status -u
+
+        for both_added in $(git status --porcelain | awk '{if ($1 == "AA") { print $2 }}'); do
+            echo "CHECKING OUT THEIRS FOR $both_added"
+            git checkout --theirs "$both_added"
+        done
+
         git add -u .
         #git status -u
         git -c core.editor=true cherry-pick --continue
