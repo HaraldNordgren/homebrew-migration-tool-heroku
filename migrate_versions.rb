@@ -64,7 +64,6 @@ formula_dir = "Formula"
 
 for dirname in [aliases_dir, formula_dir]
     unless File.directory?(dirname)
-        puts "Creating #{dirname} folder"
         FileUtils.mkdir_p(dirname)
     end
 end
@@ -90,12 +89,12 @@ for filename in Dir["*.rb"]
     version = filename.match(/(^.*?)[-]?([0-9\.]+[a-z]?).rb$/)
     if version
         replace_brew_class(filename, version.captures)
-        next
+        #next
     end
 
-    migrated_path = File.join(formula_dir, filename)
-    system("git add #{filename}")
-    system("git mv #{filename} #{migrated_path}")
+    #migrated_path = File.join(formula_dir, filename)
+    #system("git add #{filename}")
+    #system("git mv #{filename} #{migrated_path}")
     #FileUtils.mv(filename, migrated_path)
 end
 

@@ -83,8 +83,8 @@ for commit in $unmigrated_commits; do
     if ! git cherry-pick $migration_hash -X theirs --no-edit --keep-redundant-commits; then
         echo
         echo "SOLVING CONFLICTS BY ADDING ALL FILES"
-        git status
         git add -u .
+        git status
         git -c core.editor=true cherry-pick --continue
     fi
 
