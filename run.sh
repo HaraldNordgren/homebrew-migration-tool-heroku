@@ -61,16 +61,6 @@ for commit in $unmigrated_commits; do
     git checkout -b $staging_branch $commit
 
     ruby "$migrate_versions"
-    
-    #git add --ignore-removal .
-    
-    if [ -e README.md ]; then
-        git reset README.md
-    fi
-    
-    if [ -e LICENSE ]; then
-        git reset LICENSE
-    fi
 
     homebrew_message=$(git log $commit --pretty=%B -n1)
     git commit -m "Migrating $commit: '$homebrew_message'" -q
@@ -86,11 +76,13 @@ for commit in $unmigrated_commits; do
 
     if [ -n "$(git status --porcelain)" ]; then
         git commit -m "Migrated $commit: '$homebrew_message'" -q
-        
-        echo
-        echo "PUSHING TO REMOTE"
-        git push
+    else
+        git commit -m "[skip ci] Migrated $commit: '$homebrew_message'" --allow-empty -q
     fi
+
+    echo
+    echo "PUSHING TO REMOTE"
+    git push
 
     git branch -D $staging_branch
 done

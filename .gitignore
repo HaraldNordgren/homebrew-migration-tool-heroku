@@ -4,6 +4,5 @@
 /.ruby-version
 
 homebrew-migration-tool/
-homebrew-versions/
-homebrew-versions-harald*/
+homebrew-versions*/
 .ssh/
