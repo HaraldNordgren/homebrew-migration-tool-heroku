@@ -71,7 +71,7 @@ for commit in $unmigrated_commits; do
     echo "MERGING BRANCHES"
     git checkout master -q
 
-    git checkout $migration_hash Formula Aliases
+    git checkout $migration_hash Formula Aliases LICENSE
     git status -u
 
     if [ -n "$(git status --porcelain)" ]; then
