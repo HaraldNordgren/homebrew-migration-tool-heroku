@@ -41,6 +41,7 @@ git pull
 unmigrated_commits=
 
 for hash in $(git log homebrew-versions --pretty=%H); do
+    echo "Searching for $hash in migrated commit log"
     if git log master --pretty=%B | grep -q $hash; then
         break
     fi
