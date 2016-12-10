@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'json'
 
 
 def replace_brew_class (file_name, regex_captures)
@@ -29,7 +30,6 @@ def replace_brew_class (file_name, regex_captures)
         end
     end
 
-    #puts "Replacing #{classname_with_version}"
     text.sub!(
         /(^class )#{classname_with_version}([ ]*<[ ]*Formula$)/,
         '\1' + classname + '\2'
@@ -91,11 +91,6 @@ for filename in Dir["*.rb"]
         replace_brew_class(filename, version.captures)
         #next
     end
-
-    #migrated_path = File.join(formula_dir, filename)
-    #system("git add #{filename}")
-    #system("git mv #{filename} #{migrated_path}")
-    #FileUtils.mv(filename, migrated_path)
 end
 
 puts "DONE"
@@ -132,6 +127,41 @@ for file_name in Dir["*.rb"]
 end
 
 puts
+puts "DONE"
+
+puts
+puts "UPDATING HANDLED_PACKAGES FILE"
+
+handled_packages_file = "migrated_packages.json"
+
+if File.file?(handled_packages_file)
+    handled_packages_history = JSON.load(File.read(handled_packages_file))
+    #handled_packages_history = JSON.parse(File.read(handled_packages_file))
+
+    for handled_package in $handled_packages
+        found_in_history = false
+
+        for saved_package in handled_packages_history
+            if saved_package['file_without_extension'] == handled_package['file_without_extension']
+                found_in_history = true
+                break
+            end
+        end
+
+        if not found_in_history
+            puts "New package #{handled_package['file_without_extension']}"
+            handled_packages_history.push(handled_package)
+        end
+    end
+else
+    handled_packages_history = $handled_packages
+end
+
+File.open(handled_packages_file, 'w') do |f|
+    f.write(handled_packages_history.to_json)
+end
+system("git add #{handled_packages_file}")
+
 puts "DONE"
 puts
 puts "MOVING FILES ..."

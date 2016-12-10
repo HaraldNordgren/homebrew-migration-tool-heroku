@@ -18,6 +18,7 @@ if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
 else
     rm -rf homebrew-versions
     github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
+    #github_adress="https://github.com/Homebrew/homebrew-versions.git"
     #github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
 fi
 
@@ -41,7 +42,7 @@ git pull
 unmigrated_commits=
 
 for hash in $(git log homebrew-versions --pretty=%H); do
-    echo "Searching for $hash in migrated commit log"
+    #echo "Searching for $hash in migrated commit log"
     if git log master --pretty=%B | grep -q $hash; then
         break
     fi
@@ -71,7 +72,10 @@ for commit in $unmigrated_commits; do
     echo "MERGING BRANCHES"
     git checkout master -q
 
-    git checkout $migration_hash Formula Aliases LICENSE
+    git checkout $migration_hash Formula Aliases
+    git checkout $migration_hash LICENSE || true
+    git checkout $migration_hash migrated_packages.json
+
     git status -u
 
     if [ -n "$(git status --porcelain)" ]; then
@@ -85,6 +89,8 @@ for commit in $unmigrated_commits; do
     git push
 
     git branch -D $staging_branch
+
+    echo "####################################################"
 done
 
 echo "MIGRATION COMPLETED"
