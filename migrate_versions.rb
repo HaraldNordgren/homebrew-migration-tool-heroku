@@ -112,7 +112,6 @@ if File.file?(handled_packages_file)
         end
 
         if not found_in_history
-            puts "New package #{handled_package['file_without_extension']}"
             handled_packages_history.push(handled_package)
         end
     end
@@ -136,17 +135,25 @@ for file_name in Dir["*.rb"]
 
         File.open(file_name).each_line do |line|
 
-            if line =~ /^[ ]+(url|homepage|mirror|\#include) /
+            if line !~ /^[ ]+(depends_on|brew link|Formula\.factory|HOMEBREW_PREFIX) /
+            #if line =~ /^[ ]+(url|homepage|mirror|\#include|system) /
+            #if line =~ /^[ ]+(url|homepage|mirror|\#include) /
                 tmp_file.puts line
                 next
             end
 
             for handled_package in handled_packages_history
                 file_without_extension = handled_package['file_without_extension']
-                line.gsub!(
+                replaced = line.gsub!(
                     /#{file_without_extension}/,
                     handled_package['package_at_version']
                 )
+
+                if replaced
+                    puts "Replaced #{file_without_extension} with #{handled_package['package_at_version']} in #{file_name}"
+                    puts replaced
+                    puts
+                end
             end
 
             tmp_file.puts line
@@ -155,12 +162,10 @@ for file_name in Dir["*.rb"]
 
     FileUtils.mv(tmp_file_name, file_name)
     system("git add #{file_name}")
-    print "."
+    #print "."
 end
 
-puts
 puts "DONE"
-
 puts
 puts "MOVING FILES ..."
 
