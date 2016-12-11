@@ -61,6 +61,7 @@ for commit in $unmigrated_commits; do
     staging_branch=homebrew-versions-$commit
     git checkout -b $staging_branch $commit
 
+    git checkout master migrated_packages.json || true
     ruby "$migrate_versions"
 
     homebrew_message=$(git log $commit --pretty=%B -n1)

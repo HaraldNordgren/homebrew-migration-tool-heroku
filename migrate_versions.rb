@@ -93,42 +93,6 @@ for filename in Dir["*.rb"]
     end
 end
 
-puts "DONE"
-puts
-puts "REPLACING REFERENCES WITH VERSIONED NAME"
-
-for file_name in Dir["*.rb"]
-
-    tmp_file_name = file_name + ".tmp"
-    open(tmp_file_name, 'w') do |tmp_file|
-
-        File.open(file_name).each_line do |line|
-
-            if line =~ /^[ ]+(url|homepage|mirror|\#include) /
-                tmp_file.puts line
-                next
-            end
-
-            for handled_package in $handled_packages
-                file_without_extension = handled_package['file_without_extension']
-                line.gsub!(
-                    /#{file_without_extension}/,
-                    handled_package['package_at_version']
-                )
-            end
-
-            tmp_file.puts line
-        end
-    end
-
-    FileUtils.mv(tmp_file_name, file_name)
-    system("git add #{file_name}")
-    print "."
-end
-
-puts
-puts "DONE"
-
 puts
 puts "UPDATING HANDLED_PACKAGES FILE"
 
@@ -136,7 +100,6 @@ handled_packages_file = "migrated_packages.json"
 
 if File.file?(handled_packages_file)
     handled_packages_history = JSON.load(File.read(handled_packages_file))
-    #handled_packages_history = JSON.parse(File.read(handled_packages_file))
 
     for handled_package in $handled_packages
         found_in_history = false
@@ -164,9 +127,44 @@ system("git add #{handled_packages_file}")
 
 puts "DONE"
 puts
+puts "REPLACING REFERENCES WITH VERSIONED NAME"
+
+for file_name in Dir["*.rb"]
+
+    tmp_file_name = file_name + ".tmp"
+    open(tmp_file_name, 'w') do |tmp_file|
+
+        File.open(file_name).each_line do |line|
+
+            if line =~ /^[ ]+(url|homepage|mirror|\#include) /
+                tmp_file.puts line
+                next
+            end
+
+            for handled_package in handled_packages_history
+                file_without_extension = handled_package['file_without_extension']
+                line.gsub!(
+                    /#{file_without_extension}/,
+                    handled_package['package_at_version']
+                )
+            end
+
+            tmp_file.puts line
+        end
+    end
+
+    FileUtils.mv(tmp_file_name, file_name)
+    system("git add #{file_name}")
+    print "."
+end
+
+puts
+puts "DONE"
+
+puts
 puts "MOVING FILES ..."
 
-for handled_package in handled_packages_history
+for handled_package in $handled_packages
     original_filename = handled_package['original_filename']
     package_at_version = handled_package['package_at_version']
 
