@@ -158,7 +158,7 @@ else
 end
 
 File.open(handled_packages_file, 'w') do |f|
-    f.write(handled_packages_history.to_json)
+    f.write(JSON.pretty_generate(handled_packages_history))
 end
 system("git add #{handled_packages_file}")
 
@@ -166,7 +166,7 @@ puts "DONE"
 puts
 puts "MOVING FILES ..."
 
-for handled_package in $handled_packages
+for handled_package in handled_packages_history
     original_filename = handled_package['original_filename']
     package_at_version = handled_package['package_at_version']
 
@@ -176,7 +176,6 @@ for handled_package in $handled_packages
     migrated_path = File.join(formula_subdir, handled_package['migrated_filename'])
     system("git add #{original_filename}")
     system("git mv #{original_filename} #{migrated_path}")
-    #FileUtils.mv(original_filename, migrated_path)
 
     symlink_dest = File.join("..", migrated_path)
     symlink_location = File.join(aliases_dir, package_at_version)
