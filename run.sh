@@ -64,9 +64,10 @@ for commit in $unmigrated_commits; do
     git checkout master migrated_packages.json || true
     ruby "$migrate_versions"
 
-    homebrew_message=$(git log $commit --pretty=%B -n1)
-    git commit -m "Migrating $commit: '$homebrew_message'" -q
+    # Ruby processing to avoid spammy notifications on push
+    homebrew_message=$(git log $commit --pretty=%B -n1 | ruby -ne 'print $_.sub(/^@/, "").gsub(/ @/, " ")')
 
+    git commit -m "Migrating $commit: '$homebrew_message'" -q
     migration_hash=$(git rev-parse HEAD)
 
     echo
