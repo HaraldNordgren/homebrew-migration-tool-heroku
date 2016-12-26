@@ -1,11 +1,21 @@
 #!/bin/bash
 
 set -e
+set -x
 
 base_dir="$PWD"
-migrate_versions="$base_dir"/migrate_versions.rb
-#README="$base_dir"/homebrew-versions-harald-README/README.md
+script_dir="$base_dir"/scripts
+static_dir="$base_dir"/static-files
 
+export migrate_versions="$script_dir"/migrate_versions.rb
+export construct_travis_yml="$script_dir"/construct_travis_yml.rb
+
+export new_travis_yml="new_travis_yml.yml"
+
+versions_short="HaraldNordgren/homebrew-versions"
+reference_short="HaraldNordgren/homebrew-versions-reference"
+
+# Running on Heroku
 if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
     nc -k -l $PORT &
 
@@ -13,88 +23,150 @@ if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
     echo "$GITHUB_PRIVATE_SSH_KEY" > .ssh/id_rsa
     chmod 600 .ssh/id_rsa
     ssh-keyscan github.com >> .ssh/known_hosts
-    github_adress="git@github.com:HaraldNordgren/homebrew-versions.git"
-    #github_adress="git@github.com:HaraldNordgren/homebrew-versions-cherry.git"
+
+    export github_address_versions="git@github.com:${versions_short}.git"
+    export github_address_reference="git@github.com:${reference_short}.git"
+
+# Running locally
 else
-    rm -rf homebrew-versions
-    github_adress="https://github.com/HaraldNordgren/homebrew-versions.git"
-    #github_adress="https://github.com/Homebrew/homebrew-versions.git"
-    #github_adress="https://github.com/HaraldNordgren/homebrew-versions-cherry.git"
+    rm -rf homebrew-versions homebrew-reference
+    export github_address_versions="https://github.com/${$versions_short}.git"
+    export github_address_reference="https://github.com/${reference_short}.git"
 fi
 
-echo
-echo "CLONING $github_adress"
-git clone $github_adress homebrew-versions
-cd homebrew-versions
+function configure_git {
+    git config user.email "haraldnordgren+homebrew-version-migration-bot@gmail.com"
+    git config user.name "homebrew-version-migration-bot"
+    git config push.default simple
+}
 
-git remote add homebrew-versions-origin https://github.com/Homebrew/homebrew-versions
-git fetch homebrew-versions-origin
-git checkout -b homebrew-versions homebrew-versions-origin/master -q
+function copy_build_formula {
+    build_formula="$static_dir"/build_formula.rb
+    cp "$build_formula" .
+    git add build_formula.rb
+}
 
-git config user.email "haraldnordgren+homebrew-version-migration-bot@gmail.com"
-git config user.name "homebrew-version-migration-bot"
-git config push.default simple
+function copy_readme {
+    readme="$static_dir"/migrated_versions_README.md
+    cp "$readme" README.md
+    git add README.md
+}
 
-echo
-echo "PULLING LATEST COMMITS FROM HOMEBREW-VERSIONS"
-git pull
+function migrate_versions {(
+    echo
+    echo "CLONING $github_address_versions"
+    git clone $github_address_versions homebrew-versions
+    cd homebrew-versions
 
-unmigrated_commits=
+    git remote add homebrew-versions-origin https://github.com/Homebrew/homebrew-versions
+    git fetch homebrew-versions-origin
+    git checkout -b homebrew-versions homebrew-versions-origin/master -q
 
-for hash in $(git log homebrew-versions --pretty=%H); do
-    #echo "Searching for $hash in migrated commit log"
-    if git log master --pretty=%B | grep -q $hash; then
-        break
+    configure_git
+
+    echo
+    echo "PULLING LATEST COMMITS FROM HOMEBREW-VERSIONS"
+    git pull
+
+    unmigrated_commits=
+    for hash in $(git log homebrew-versions --pretty=%H); do
+        if git log master --pretty=%B | grep -q $hash; then
+            break
+        fi
+        unmigrated_commits="$hash $unmigrated_commits"
+    done
+
+    if [ -z "$unmigrated_commits" ]; then
+        git checkout master
+        ruby "$construct_travis_yml" versions "$new_travis_yml"
+
+        if ! diff -q .travis.yml "$new_travis_yml" > /dev/null 2>&1; then
+            mv "$new_travis_yml" .travis.yml
+            git add .travis.yml
+
+            copy_build_formula
+            copy_readme
+
+            git commit -m "Updated .travis.yml"
+            git push
+        else
+            echo "NOTHING NEW TO MIGRATE"
+        fi
+        return
     fi
 
-    unmigrated_commits="$hash $unmigrated_commits"
-done
+    for commit in $unmigrated_commits; do
+        echo
+        echo "MIGRATING $commit"
+        staging_branch=homebrew-versions-$commit
+        git checkout -b $staging_branch $commit
 
-if [ -z "$unmigrated_commits" ]; then
-    echo "NOTHING NEW TO MIGRATE"
-    exit 0
-fi
+        git checkout master migrated_packages.json || true
+        ruby "$migrate_versions"
 
-for commit in $unmigrated_commits; do
+        # Ruby processing to avoid spammy notifications on push
+        homebrew_message=$(git log $commit --pretty=%B -n1 | ruby -ne 'print $_.sub(/^@/, "").gsub(/ @/, " ")')
+        git commit -m "Migrating $commit: '$homebrew_message'" -q
+
+        migration_hash=$(git rev-parse HEAD)
+
+        echo
+        echo "MERGING BRANCHES"
+        git checkout master -q
+
+        git checkout $migration_hash Formula Aliases
+        git checkout $migration_hash LICENSE || true
+        git checkout $migration_hash migrated_packages.json
+        
+        ruby "$construct_travis_yml" versions "$new_travis_yml"
+        mv "$new_travis_yml" .travis.yml
+        git add .travis.yml
+
+        copy_build_formula
+        copy_readme
+
+        git status -u
+
+        if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Migrated $commit: '$homebrew_message'" -q
+        else
+            git commit -m "[skip ci] Migrated $commit: '$homebrew_message'" --allow-empty -q
+        fi
+
+        echo
+        echo "PUSHING TO REMOTE"
+        git push
+
+        git branch -D $staging_branch
+
+        echo "####################################################"
+    done
+
+    echo "MIGRATION COMPLETED"
+)}
+
+function migrate_reference {(
     echo
-    echo "MIGRATING $commit"
-    staging_branch=homebrew-versions-$commit
-    git checkout -b $staging_branch $commit
+    echo "CLONING $github_address_reference"
+    git clone $github_address_reference homebrew-versions-reference
+    cd homebrew-versions-reference
 
-    git checkout master migrated_packages.json || true
-    ruby "$migrate_versions"
+    configure_git
 
-    # Ruby processing to avoid spammy notifications on push
-    homebrew_message=$(git log $commit --pretty=%B -n1 | ruby -ne 'print $_.sub(/^@/, "").gsub(/ @/, " ")')
+    ruby "$construct_travis_yml" reference "$new_travis_yml"
+    if ! diff -q .travis.yml "$new_travis_yml" > /dev/null 2>&1; then
+        mv "$new_travis_yml" .travis.yml
+        git add .travis.yml
 
-    git commit -m "Migrating $commit: '$homebrew_message'" -q
-    migration_hash=$(git rev-parse HEAD)
+        copy_build_formula
 
-    echo
-    echo "MERGING BRANCHES"
-    git checkout master -q
-
-    git checkout $migration_hash Formula Aliases
-    git checkout $migration_hash LICENSE || true
-    git checkout $migration_hash migrated_packages.json
-
-    git status -u
-
-    if [ -n "$(git status --porcelain)" ]; then
-        git commit -m "Migrated $commit: '$homebrew_message'" -q
+        git commit -m "Updated .travis.yml"
+        git push
     else
-        git commit -m "[skip ci] Migrated $commit: '$homebrew_message'" --allow-empty -q
+        echo "TRAVIS YML ALREADY UP-TO-DATE"
     fi
+)}
 
-    echo
-    echo "PUSHING TO REMOTE"
-    git push
 
-    git branch -D $staging_branch
-
-    echo "####################################################"
-done
-
-echo "MIGRATION COMPLETED"
-exit 0
-
+migrate_versions
+migrate_reference
