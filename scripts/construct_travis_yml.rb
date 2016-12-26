@@ -57,7 +57,7 @@ output_yml = {
     },
 
     "script" => [
-        'ruby scripts/build_formula.rb $FORMULA'
+        'ruby tests/build_formula.rb $FORMULA'
     ],
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-set -x
+#set -x
 
 base_dir="$PWD"
 script_dir="$base_dir"/scripts
@@ -42,8 +42,9 @@ function configure_git {
 
 function copy_build_formula {
     build_formula="$static_dir"/build_formula.rb
-    cp "$build_formula" .
-    git add build_formula.rb
+    mkdir -p tests
+    cp "$build_formula" tests
+    git add tests/build_formula.rb
 }
 
 function copy_readme {
