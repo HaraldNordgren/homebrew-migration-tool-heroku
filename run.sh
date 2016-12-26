@@ -9,11 +9,12 @@ static_dir="$base_dir"/static-files
 
 export migrate_versions="$script_dir"/migrate_versions.rb
 export construct_travis_yml="$script_dir"/construct_travis_yml.rb
-
 export new_travis_yml="new_travis_yml.yml"
 
 versions_short="HaraldNordgren/homebrew-versions"
 reference_short="HaraldNordgren/homebrew-versions-reference"
+
+travis_string="Updated .travis.yml ($(ruby -e 'print Time.now.getlocal("+01:00")'))"
 
 # Running on Heroku
 if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
@@ -88,7 +89,7 @@ function migrate_versions {(
             copy_build_formula
             copy_readme
 
-            git commit -m "Updated .travis.yml"
+            git commit -m "$travis_string"
             git push
         else
             echo "NOTHING NEW TO MIGRATE"
@@ -161,7 +162,7 @@ function migrate_reference {(
 
         copy_build_formula
 
-        git commit -m "Updated .travis.yml"
+        git commit -m "$travis_string"
         git push
     else
         echo "TRAVIS YML ALREADY UP-TO-DATE"
