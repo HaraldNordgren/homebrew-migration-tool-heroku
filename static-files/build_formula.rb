@@ -26,7 +26,6 @@ puts
 
 if not successful_exit
     puts "Cannot tap with cmd: '#{tap_cmd}'"
-    puts File.read(tap_log_file)
     exit 1
 end
 
@@ -81,16 +80,12 @@ for cmd in cmd_list
     logging_cmds.push("echo [#{cmd}]")
     logging_cmds.push(cmd)
 end
+
 concatenated_cmd = logging_cmds.join(" && ")
-
 successful_exit = system(concatenated_cmd)
-if successful_exit
-    puts "INSTALLED #{file_without_extension} SUCCESSFULLY"
-    puts open(log_file) {
-        |f| f.grep(/built in/)
-    }
-    exit 0
-end
 
-puts "FAILED TO INSTALL #{file_without_extension}"
-exit 1
+if successful_exit
+    exit 0
+else
+    exit 1
+end
