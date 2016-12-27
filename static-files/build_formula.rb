@@ -75,17 +75,26 @@ cmd_list.push("brew install --verbose #{package_full_name}")
 cmd_list.push("echo DONE")
 
 
+log_file = "#{file_without_extension}.log"
 logging_cmds = []
-for cmd in cmd_list
-    logging_cmds.push("echo [#{cmd}]")
-    logging_cmds.push(cmd)
+for cmd in cmd_listZ
+    logging_cmds.push("echo [#{cmd}] >> #{log_file}")
+    logging_cmds.push("#{cmd} >> #{log_file} 2>&1")
+
 end
 
 concatenated_cmd = logging_cmds.join(" && ")
 successful_exit = system(concatenated_cmd)
 
 if successful_exit
+    puts "INSTALLED #{file_without_extension} SUCCESSFULLY"
+    puts open(log_file) {
+        |f| f.grep(/built in/)
+    }
     exit 0
 else
+    puts "FAILED TO INSTALL #{file_without_extension}"
+    puts
+    puts File.read(log_file)
     exit 1
 end
