@@ -88,8 +88,8 @@ before_script = {
     ],
 }
 
-# for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
-for xcode in ["xcode8.2"]
+for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
+# for xcode in ["xcode8.2"]
     skip_build = skip_builds[xcode]
     before = before_script[xcode]
 
