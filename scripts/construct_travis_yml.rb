@@ -64,7 +64,9 @@ skip_builds = {
     "xcode7.3" => [],
     "xcode6.4" => [],
 }
+
 formulas = []
+before_script = {}
 
 if repo_name == 'reference'
     tap_author = 'homebrew'
@@ -99,36 +101,38 @@ elsif repo_name == 'versions'
         formula = File.basename(file_name)
         formulas.push(formula)
     end
+
+    before_script["xcode8"] = [
+        "brew untap homebrew/versions",
+    ]
+    before_script["xcode7.3"] = [
+        "brew untap homebrew/versions",
+    ]
+    before_script["xcode6.4"] = [
+        "brew untap homebrew/versions",
+    ]
 end
 
 formulas.sort!
 
 before_script_prefix = [
-    "brew unlink maven",
+    # "brew unlink maven",
 ]
-before_script = {
-    "xcode8.2" => [],
-    "xcode8.1" => [],
-    "xcode8" => [
-        "brew untap homebrew/versions",
-    ],
-    "xcode7.3" => [
-        "brew untap homebrew/versions",
-    ],
-    "xcode6.4" => [
-        "brew untap homebrew/versions",
-    ],
-}
 before_script_suffix = [
     "brew tap #{tap_author}/#{tap_short_name}",
     "brew update",
 ]
 
 includes = []
-#for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
-for xcode in ["xcode8"]
+for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
+#for xcode in ["xcode8"]
     skip_build = skip_builds[xcode]
-    xcode_before = before_script[xcode]
+
+    if before_script.has_key?(xcode)
+        xcode_before = before_script[xcode]
+    else
+        xcode_before = []
+    end
 
     for formula in formulas
         if skip_build.include?(formula)
