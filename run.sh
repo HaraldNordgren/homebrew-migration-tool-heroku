@@ -14,7 +14,7 @@ export new_travis_yml="new_travis_yml.yml"
 versions_short="HaraldNordgren/homebrew-versions"
 reference_short="HaraldNordgren/homebrew-versions-reference"
 
-travis_string="Updated .travis.yml ($(ruby -e 'print Time.now.getlocal("+01:00")'))"
+travis_string="Updated build suite ($(ruby -e 'print Time.now.getlocal("+01:00")'))"
 
 # Running on Heroku
 if [ -n "$GITHUB_PRIVATE_SSH_KEY" ]; then
@@ -82,13 +82,13 @@ function migrate_versions {(
         git checkout master
         ruby "$construct_travis_yml" versions "$new_travis_yml"
 
-        if ! diff -q .travis.yml "$new_travis_yml" > /dev/null 2>&1; then
-            mv "$new_travis_yml" .travis.yml
-            git add .travis.yml
+        mv "$new_travis_yml" .travis.yml
+        git add .travis.yml
 
-            copy_build_formula
-            copy_readme
+        copy_build_formula
+        copy_readme
 
+        if [[ $(git status --porcelain) ]]; then
             git commit -m "$travis_string"
             git push
         else
@@ -156,12 +156,11 @@ function migrate_reference {(
     configure_git
 
     ruby "$construct_travis_yml" reference "$new_travis_yml"
-    if ! diff -q .travis.yml "$new_travis_yml" > /dev/null 2>&1; then
-        mv "$new_travis_yml" .travis.yml
-        git add .travis.yml
+    mv "$new_travis_yml" .travis.yml
+    git add .travis.yml
+    copy_build_formula
 
-        copy_build_formula
-
+    if [[ $(git status --porcelain) ]]; then
         git commit -m "$travis_string"
         git push
     else

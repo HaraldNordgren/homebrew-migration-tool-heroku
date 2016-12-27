@@ -77,7 +77,7 @@ cmd_list.push("echo DONE")
 
 log_file = "#{file_without_extension}.log"
 logging_cmds = []
-for cmd in cmd_listZ
+for cmd in cmd_list
     logging_cmds.push("echo [#{cmd}] >> #{log_file}")
     logging_cmds.push("#{cmd} >> #{log_file} 2>&1")
 
