@@ -27,10 +27,8 @@ if repo_name == 'reference'
         end
         skip_builds[xcode] = new_list
     end
-
-    puts Dir.pwd
+    
     for file_name in Dir["*.rb"]
-        puts file_name
         formula = File.basename(file_name, File.extname(file_name))
         formulas.push(formula)
     end

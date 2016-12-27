@@ -120,13 +120,7 @@ function migrate_versions {(
         git checkout $migration_hash LICENSE || true
         git checkout $migration_hash migrated_packages.json
         
-        (
-            git clone https://github.com/Homebrew/homebrew-versions versions-original
-            cd versions-original
-            ruby "$construct_travis_yml" versions "$new_travis_yml"
-        )
-
-        #ruby "$construct_travis_yml" versions "$new_travis_yml"
+        ruby "$construct_travis_yml" versions "$new_travis_yml"
         mv "$new_travis_yml" .travis.yml
         git add .travis.yml
 
@@ -161,8 +155,13 @@ function migrate_reference {(
 
     configure_git
 
-    ruby "$construct_travis_yml" reference "$new_travis_yml"
-    mv "$new_travis_yml" .travis.yml
+    (
+        git clone https://github.com/Homebrew/homebrew-versions versions-original
+        cd versions-original
+        ruby "$construct_travis_yml" reference "$new_travis_yml"
+    )
+
+    mv versions-original/"$new_travis_yml" .travis.yml
     git add .travis.yml
     copy_build_formula
 
