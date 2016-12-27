@@ -104,8 +104,6 @@ end
 formulas.sort!
 
 before_script_prefix = [
-    # "brew unlink automake",
-    # "brew unlink autoconf",
     "brew unlink maven",
 ]
 before_script = {
@@ -124,8 +122,6 @@ before_script = {
 before_script_suffix = [
     "brew tap #{tap_author}/#{tap_short_name}",
     "brew update",
-    "brew update",
-    "brew doctor",
 ]
 
 includes = []
