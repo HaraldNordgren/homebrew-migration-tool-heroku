@@ -6,21 +6,27 @@ output_file = ARGV[1]
 
 formulas = []
 
-XCODES = ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
-
-skip_builds = {}
-for xcode in XCODES
-    skip_builds[xcode] = []
-end
-
-skip_builds["xcode8.2"] = [
-    "allegro@4",
-    "appledoc@20",
-    "appledoc@21",
-]
+skip_builds = {
+    "xcode8.2" => [
+        "allegro-@4",
+        "appledoc-@20",
+        "appledoc-@21",
+    ],
+    "xcode8.1" => [],
+    "xcode8" => [],
+    "xcode7.3" => [],
+    "xcode6.4" => [],
+}
 
 if repo_name == 'reference'
     # skip_packages_string = ARGV[0].gsub("-@", "-").gsub("@", "")
+    skip_builds.each do |xcode, skip_list|
+        new_list = []
+        for package in skip_list
+            new_list.push(package.sub("-@", "-").sub("@", ""))
+        end
+        skip_builds[xcode] = new_list
+    end
 
     puts Dir.pwd
     for file_name in Dir["*.rb"]
@@ -31,6 +37,14 @@ if repo_name == 'reference'
 
 elsif repo_name == 'versions'
     # skip_packages_string = ARGV[0].gsub("-@", "@")
+    skip_builds.each do |xcode, skip_list|
+        new_list = []
+        for package in skip_list
+            new_list.push(package.sub("-@", "@"))
+        end
+        skip_builds[xcode] = new_list
+    end
+
     for file_name in Dir["Aliases/*"]
         if file_name == "Aliases/"
             next
@@ -87,7 +101,9 @@ for xcode in ["xcode8.2"]
         end
 
         includes.push({
+            "language" => "ruby",
             "env" => "FORMULA=#{formula}",
+            "os" => "osx",
             "osx_image" => xcode,
             "before_script" => before,
             "script" => 'travis_wait 50 ruby tests/build_formula.rb $FORMULA',
@@ -96,7 +112,6 @@ for xcode in ["xcode8.2"]
 end
 
 output_yml = {
-    "language" => "ruby",
     "notifications" => {
         "email" => false
     },
@@ -105,12 +120,14 @@ output_yml = {
             "master"
         ]
     },
-    "os" => "osx",
     "matrix" => {
         "include" => includes
     },
 }
 
+#require 'awesome_print'
+#ap output_yml.to_yaml
+#puts
 
 File.open(output_file,"w") do |file|
    file.write output_yml.to_yaml
