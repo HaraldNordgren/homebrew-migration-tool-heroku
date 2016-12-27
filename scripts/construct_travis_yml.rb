@@ -15,10 +15,14 @@ skip_builds["xcode8.2"] = ["allegro@4"]
 
 if repo_name == 'reference'
     # skip_packages_string = ARGV[0].gsub("-@", "-").gsub("@", "")
+    puts Dir.pwd
     for file_name in Dir["*.rb"]
+        puts file_name
         formula = File.basename(file_name, File.extname(file_name))
         formulas.push(formula)
     end
+
+    #    for file_name in Dir["*.rb"]; puts File.basename(file_name, File.extname(file_name)); end
 
 elsif repo_name == 'versions'
     # skip_packages_string = ARGV[0].gsub("-@", "@")
@@ -49,6 +53,7 @@ for xcode in ["xcode8.2"]
         includes.push({
             "env" => "FORMULA=#{formula}",
             "osx_image" => xcode,
+            "script" => 'ruby tests/build_formula.rb $FORMULA',
         })
     end
 end
@@ -67,9 +72,6 @@ output_yml = {
     "matrix" => {
         "include" => includes
     },
-    "script" => [
-        'ruby tests/build_formula.rb $FORMULA'
-    ],
 }
 
 

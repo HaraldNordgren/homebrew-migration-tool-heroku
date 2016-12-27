@@ -120,6 +120,8 @@ function migrate_versions {(
         git checkout $migration_hash LICENSE || true
         git checkout $migration_hash migrated_packages.json
         
+        pwd
+        ll *
         ruby "$construct_travis_yml" versions "$new_travis_yml"
         mv "$new_travis_yml" .travis.yml
         git add .travis.yml
