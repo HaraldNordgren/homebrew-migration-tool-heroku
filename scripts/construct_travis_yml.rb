@@ -32,9 +32,9 @@ def package_specific_before_build_commands(file_without_extension)
 
     if file_without_extension =~ /automake/
         cmd_list.push("brew unlink automake")
-    elsif file_without_extension !~ /influxdb[@]?08|ledger[@]?26|llvm[@]?35|thrift[@]?090|riak[@]?132|rebar[@]?3|rabbitmq[@]?30|erlang|gdal[@]?111/
-        cmd_list.push("brew unlink autoconf")
-        cmd_list.push("brew unlink automake")
+    #elsif file_without_extension !~ /influxdb[@]?08|ledger[@]?26|llvm[@]?35|thrift[@]?090|riak[@]?132|rebar[@]?3|rabbitmq[@]?30|erlang|gdal[@]?111/
+    #    cmd_list.push("brew unlink autoconf")
+    #    cmd_list.push("brew unlink automake")
     end
 
     return cmd_list
