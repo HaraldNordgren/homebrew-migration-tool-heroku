@@ -1,8 +1,6 @@
 require 'fileutils'
 
 
-start_time = Time.now
-
 package_full_name = ARGV[0]
 puts "INSTALLING #{package_full_name}"
 
@@ -26,9 +24,16 @@ if successful_exit
         |f| f.grep(/built in/)
     }
     exit 0
-else
-    puts "FAILED TO INSTALL #{package_full_name}"
-    puts
-    puts File.read(log_file)
-    exit 1
 end
+
+puts "FAILED TO INSTALL #{package_full_name}"
+puts
+
+log_output = File.read(log_file)
+
+if log_output.include? "https://git.io/brew-troubleshooting"
+    system("brew gist-logs #{package_full_name}")
+end
+
+puts log_output
+exit 1

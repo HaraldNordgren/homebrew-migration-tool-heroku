@@ -12,29 +12,33 @@ def package_specific_before_build_commands(file_without_extension)
         cmd_list.push("brew unlink go")
     elsif file_without_extension =~ /jpeg[@]?gb|jpeg[@]?6b/
         cmd_list.push("brew unlink jpeg")
-    elsif file_without_extension =~ /ruby[@]?192/
-        cmd_list.push("brew unlink ruby")
-    elsif file_without_extension =~ /subversion[@]?18/
-        cmd_list.push("brew unlink subversion")
+    #elsif file_without_extension =~ /ruby[@]?192/
+    #    cmd_list.push("brew unlink ruby")
+    #elsif file_without_extension =~ /subversion[@]?18/
+    #    cmd_list.push("brew unlink subversion")
     elsif file_without_extension =~ /povray[@]?36/
         cmd_list.push("brew unlink libpng")
     elsif file_without_extension =~ /postgresql[@]?[0-9]+/
         cmd_list.push("brew unlink postgresql")
-    elsif file_without_extension =~ /lz4[@]?r117/
-        cmd_list.push("brew unlink lz4")
+    #elsif file_without_extension =~ /lz4[@]?r117/
+    #    cmd_list.push("brew unlink lz4")
     elsif file_without_extension =~ /appledoc/
+        cmd_list.push("rm /usr/local/include/c++")
         cmd_list.push("brew install gcc")
     elsif file_without_extension =~ /duplicity/
         cmd_list.push("pip install testrepository")
     elsif file_without_extension =~ /gcc[@]?6/
         cmd_list.push("rm /usr/local/include/c++")
-    end
-
-    if file_without_extension =~ /automake/
+    elsif file_without_extension =~ /automake/
         cmd_list.push("brew unlink automake")
-    #elsif file_without_extension !~ /influxdb[@]?08|ledger[@]?26|llvm[@]?35|thrift[@]?090|riak[@]?132|rebar[@]?3|rabbitmq[@]?30|erlang|gdal[@]?111/
-    #    cmd_list.push("brew unlink autoconf")
-    #    cmd_list.push("brew unlink automake")
+    elsif file_without_extension =~ /autoconf/
+        cmd_list.push("brew unlink autoconf")
+    elsif file_without_extension =~ /kafka/
+        cmd_list.push("brew cask install java")
+    elsif file_without_extension =~ /maven/
+        cmd_list.push("brew unlink maven")
+    elsif file_without_extension =~ /open-mpi/
+        cmd_list.push("brew unlink open-mpi")
     end
 
     return cmd_list
@@ -58,8 +62,31 @@ skip_builds = {
         "gcc@49", # Times out, check for problems on migrated!
         "gcc@5", # Times out, check for problems on migrated!
         "go@16",
+        "imagemagick-ruby@186", # https://github.com/Homebrew/homebrew-versions/issues/1407
+        "llvm@35", # Times out
+        "llvm@36", # Times out
+        "llvm@37", # Times out
+        "nu@0",
+        "phantomjs@198",
+        "subversion@17",
+        "valgrind@38",
     ],
-    "xcode8.1" => [],
+    "xcode8.1" => [
+        "allegro@4",
+        "gcc@43",
+        "gcc@44",
+        "gcc@45",
+        "gcc@46", # Times out
+        "gcc@47", # Times out
+        "gcc@48", # Times out
+        "gcc@49", # Times out
+        "gcc@5", # Times out
+        "go@16",
+        "imagemagick-ruby@186", # https://github.com/Homebrew/homebrew-versions/issues/1407
+        "llvm@35", # Times out
+        "llvm@36", # Times out
+        "llvm@37", # Times out
+    ],
     "xcode8" => [],
     "xcode7.3" => [],
     "xcode6.4" => [],
@@ -142,9 +169,11 @@ for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
         unlink_before = package_specific_before_build_commands(formula)
         before = unlink_before + before_script_prefix + xcode_before + before_script_suffix
 
+        # if file_without_extension ~= gst-plugins-bad010
+        #    add option to sctip: "--HEAD"
+
         package_full_name = "#{tap_author}/#{tap_short_name}/#{formula}"
         includes.push({
-            "language" => "ruby",
             "env" => "Formula=#{formula}",
             "os" => "osx",
             "osx_image" => xcode,
@@ -155,6 +184,7 @@ for xcode in ["xcode8.2", "xcode8.1", "xcode8", "xcode7.3", "xcode6.4"]
 end
 
 output_yml = {
+    "language" => "ruby",
     "notifications" => {
         "email" => false
     },
