@@ -6,16 +6,17 @@ def package_specific_before_build_commands(file_without_extension)
 
     if file_without_extension =~ /gdal[@]?111/
         cmd_list.push("brew unlink gdal")
-    elsif file_without_extension =~ /gnupg[@]?21/
-        cmd_list.push("brew unlink gnupg2 gpg-agent dirmngr")
-    elsif file_without_extension =~ /go[@]?15/
+    #elsif file_without_extension =~ /gnupg[@]?21/
+    #    cmd_list.push("brew unlink gnupg2 gpg-agent dirmngr")
+    # 'Error: No such keg: /usr/local/Cellar/gnupg2' on xcode<=8
+    elsif file_without_extension =~ /go[@]?[0-9]+/
         cmd_list.push("brew unlink go")
     elsif file_without_extension =~ /jpeg[@]?gb|jpeg[@]?6b/
         cmd_list.push("brew unlink jpeg")
     #elsif file_without_extension =~ /ruby[@]?192/
     #    cmd_list.push("brew unlink ruby")
-    #elsif file_without_extension =~ /subversion[@]?18/
-    #    cmd_list.push("brew unlink subversion")
+    elsif file_without_extension =~ /subversion/
+        cmd_list.push("brew unlink subversion")
     elsif file_without_extension =~ /povray[@]?36/
         cmd_list.push("brew unlink libpng")
     elsif file_without_extension =~ /postgresql[@]?[0-9]+/
@@ -34,11 +35,13 @@ def package_specific_before_build_commands(file_without_extension)
     elsif file_without_extension =~ /autoconf/
         cmd_list.push("brew unlink autoconf")
     elsif file_without_extension =~ /kafka/
-        cmd_list.push("brew cask install java")
+        cmd_list.push("brew cask reinstall java")
     elsif file_without_extension =~ /maven/
         cmd_list.push("brew unlink maven")
-    elsif file_without_extension =~ /open-mpi/
-        cmd_list.push("brew unlink open-mpi")
+    #elsif file_without_extension =~ /open-mpi/
+    #    cmd_list.push("brew unlink open-mpi")
+    elsif file_without_extension =~ /gst-plugin-good/
+        cmd_list.push("brew cask install xquartz")
     end
 
     return cmd_list
@@ -86,10 +89,25 @@ skip_builds = {
         "llvm@35", # Times out
         "llvm@36", # Times out
         "llvm@37", # Times out
+        "phantomjs@198",
     ],
-    "xcode8" => [],
-    "xcode7.3" => [],
-    "xcode6.4" => [],
+    "xcode8" => [
+        "gcc@44",
+        "gcc@45",
+        "gcc@47", # Times out
+        "phantomjs@198",
+    ],
+    "xcode7.3" => [
+        "gcc@44",
+        "gcc@45",
+        "gcc@46", # Times out
+        "gcc@47", # Times out
+        "phantomjs@198",
+    ],
+    "xcode6.4" => [
+        "gcc@44",
+        "gcc@49",
+    ],
 }
 
 formulas = []
@@ -187,6 +205,9 @@ output_yml = {
     "language" => "ruby",
     "notifications" => {
         "email" => false
+    },
+    "git" => {
+        "depth" => 10000,
     },
     "branches" => {
         "only" => [
